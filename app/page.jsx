@@ -1101,7 +1101,7 @@ export default function LandingPage() {
 
           <div className="lp-stats">
             <StatItem label="Testnet status" value="Live" statusDot />
-            <StatItem label="Chains supported" numeric={9} />
+            <StatItem label="Chains supported in wallet" numeric={9} />
             <StatItem label="Finality target" value="<1s" />
             <StatItem label="TPS target" numeric={10000} suffix="+" />
           </div>
