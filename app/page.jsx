@@ -711,6 +711,7 @@ export default function LandingPage() {
         /* ---------- section shell ---------- */
         .lp-section {
           padding: 90px 0;
+          background: #fff;
         }
         .lp-section.tight {
           padding: 70px 0;
