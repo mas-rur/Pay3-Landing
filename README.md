@@ -1,12 +1,13 @@
 # Pay3 — Landing Page
 
-The marketing page for the upcoming Pay3 L1 blockchain, at `pay3.space`.
+The marketing page for Pay3, at `pay3.space`. Redesigned around ton.org's
+actual current structure (glow hero, live stat strip, feature-tile grid,
+minimal nav) — pulled from the live site rather than guessed — adapted into
+Pay3's white/black/`#67C6FE` brand instead of TON's dark theme.
 
-This is a **separate, standalone project** from the Pay3 Wallet — no wallet
-code or dependencies live here on purpose, since the wallet is its own
-deployment at `app.pay3.space`. This project is just `app/page.jsx` plus the
-minimum Next.js scaffolding (`app/layout.jsx`, `next.config.mjs`,
-`package.json`) needed to run it.
+Standalone project, no wallet code here — the wallet is its own deployment
+at `app.pay3.space`, the testnet at `testnet.pay3.space`, the docs at
+`docs.pay3.space`.
 
 ## 1. Setup
 
@@ -17,87 +18,80 @@ npm run dev
 
 Open http://localhost:3000.
 
-## 2. Before you deploy — two URLs to update
+## 2. Four URLs, one placeholder among them
 
-Both are constants at the top of `app/page.jsx`:
+All near the top of `app/page.jsx`:
 
 ```js
 const WALLET_URL = "https://app.pay3.space";
+const TESTNET_URL = "https://testnet.pay3.space";
+const DOCS_URL = "https://docs.pay3.space";
 const CHROME_EXTENSION_URL = "https://chromewebstore.google.com/"; // TODO
 ```
 
-- **`WALLET_URL`** — already set to `app.pay3.space` as requested. Both the
-  "Launch Wallet" buttons (nav + content section) link here.
-- **`CHROME_EXTENSION_URL`** — you asked for the "Add to Chrome" button to be
-  enabled now, even though the extension doesn't exist yet. Rather than
-  leave it a dead link, it currently points at the general Chrome Web Store
-  homepage as a placeholder. **Update this to your real extension's listing
-  URL once it's published** — otherwise people who click it land somewhere
-  generic instead of your actual extension. It's the one thing in this
-  project that's a placeholder standing in for a future asset, so it's
-  flagged here and again as a code comment right above the constant.
+The first three are real, as requested. `CHROME_EXTENSION_URL` is still a
+placeholder — the button is enabled (not "coming soon"), but there's no
+extension published yet, so it currently points at the general Chrome Web
+Store rather than a dead link. **Update it once the real extension is live**,
+or people who click it land somewhere generic.
 
-## 3. Logo
+## 3. The hero font
 
-Put `logo.png` in `public/` (not `app/` — Next.js only serves static files
-from `public/`). It's used in the header brand mark and as the favicon. A
-reminder is also in `public/PUT_YOUR_LOGO_HERE.txt`. Until it's added, the
-brand mark falls back to a small "P3" badge — nothing breaks.
+The big "PAY3" wordmark in the hero uses a custom font; everything else
+(including the smaller "Pay3" wordmark in the nav and footer) stays Space
+Grotesk, as requested.
 
-## 4. Deploying (e.g. to Vercel)
+Put your font file in `public/fonts/font.ttf` — there's a reminder in
+`public/fonts/PUT_YOUR_FONT_HERE.txt`. It's wired up via a plain CSS
+`@font-face` rule in `app/page.jsx` (search for `Pay3Hero`), not
+`next/font/local`. That's a deliberate choice: `next/font/local` reads the
+font file at *build time* — if it's missing, `next build` fails outright.
+A runtime `@font-face` degrades gracefully instead: no file yet, and the
+browser just falls back to Space Grotesk Bold for that one heading, nothing
+breaks. Drop the real file in later and it swaps in automatically on the
+next deploy, no code changes needed.
 
-1. Push this project to its own GitHub repo (separate from the wallet's
-   repo).
-2. Import it in Vercel as its own project.
-3. Assign the `pay3.space` domain to it in Vercel's domain settings — do
-   **not** assign `app.pay3.space` here, that domain belongs to the wallet's
-   separate Vercel project.
-4. No environment variables are needed — this page doesn't call any APIs.
+## 4. What changed from the previous version
 
-If you'd rather run both the landing page and the wallet from a single
-repo/project instead of two, that's also possible (e.g. via Next.js
-rewrites or a monorepo), but it's a bigger restructuring than what's here —
-ask if you want that instead.
+- **Structure**: pivoted from the pixel/voxel poster layout to a cleaner,
+  sectioned, stat-driven layout — hero → live stat strip → Vision (3 cards)
+  → Key Features (6 tiles) → Available Now (Wallet/Testnet/Docs, the main
+  conversion section) → Roadmap → footer. No more dither band or pixel body
+  copy.
+- **Testnet is real now**: the hero eyebrow says "Testnet live," there's a
+  dedicated "Try the Testnet" button alongside "Launch Wallet," and it's one
+  of three cards in the "Available Now" section.
+- **Docs are suggested**, not just linked: a "Documentation" card sits next
+  to Wallet and Testnet in "Available Now," plus links in the nav and a
+  "Developers" column in the footer.
+- **Roadmap corrected**: "Pay3 L1 Testnet" is now marked **Live**, not "In
+  progress" — it was stale relative to reality after the testnet actually
+  shipped.
+- **Footer rebuilt**: from a single thin line to a proper 4-column layout —
+  brand blurb, Product links, Developer links, and a live-status column —
+  plus the same bottom bar with copyright and tags as before.
+- The voxel sphere hero visual (Three.js) carries over unchanged, just
+  resized and moved into a two-column hero layout instead of being the
+  full-width centerpiece.
 
-## 5. What's on the page, and why it's built this way
+## 5. Logo
 
-- **No wallet content.** Per your request, this page doesn't describe wallet
-  features, chains, or show any wallet UI — it's purely about the Pay3 L1,
-  with the wallet and Chrome extension as two exit-CTAs.
-- **A rotating voxel sphere in the hero**, built with Three.js
-  (`InstancedMesh` of ~460 small cubes arranged with a Fibonacci sphere
-  distribution, a few "spiked" outliers for that fragmented-crystal look,
-  colored via a black→accent-blue gradient by facing/height, slowly
-  rotating). It's lazy-loaded (dynamic `import("three")`) so it doesn't
-  block the initial page load — confirmed in this environment that it code-
-  splits into its own ~740KB chunk, separate from the ~110KB first-load JS.
-  If WebGL fails to initialize for any reason, a CSS radial-gradient orb
-  underneath it stays visible instead of leaving a blank gap.
-- **A pixelated dither transition band** between the black hero and white
-  content section — a grid of small squares whose black/white ratio shifts
-  from top to bottom, generated with a deterministic seeded function (not
-  `Math.random()`) so it renders identically on the server and after client
-  hydration — using real randomness here would otherwise cause a hydration
-  mismatch.
-- **"Press Start 2P"** (Google Fonts, open license) for the big pixel-block
-  headline and wordmark, paired with Space Grotesk for everything else —
-  matching the reference image's mix of a chunky pixel display face and a
-  clean regular body face, in Pay3's own black / white / `#67C6FE` palette
-  rather than the reference's blue.
-- One thing I can't verify from here: **I don't have a browser/GPU in this
-  environment**, so I could build and confirm the Three.js scene compiles
-  and runs without throwing, but I can't see the actual rendered voxel
-  sphere myself. Take a look once it's running and let me know if the
-  shape, density, or colors need adjusting — easy to iterate on.
+Put `logo.png` in `public/` (not `app/`). Falls back to a "P3" text badge
+until it's added.
 
-## 6. Known `npm audit` findings
+## 6. Deploying (e.g. to Vercel)
 
-Same as the wallet project: `npm audit` reports high-severity findings in
-`postcss`/`sharp`, both pulled in transitively by Next.js's image optimizer
-and unrelated to anything this page actually does. `npm audit fix --force`
-"fixes" this by downgrading Next.js to an ancient version — don't run it.
+Same as before: its own repo, its own Vercel project, assign it the
+`pay3.space` domain. No environment variables needed.
 
-## 7. Tech
+## 7. Known `npm audit` findings
+
+Same `postcss`/`sharp` transitive findings as the other three Pay3
+projects, from Next.js's image optimizer, unrelated to this page. Don't run
+`npm audit fix --force`.
+
+## 8. Tech
 
 Next.js 15 (App Router) · React · Three.js (lazy-loaded, hero visual only) ·
-lucide-react icons · Space Grotesk + Press Start 2P (Google Fonts).
+lucide-react icons · Space Grotesk (Google Fonts) + your custom font (local,
+hero only).
